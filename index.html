@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f5ef">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="羊片场">
+  <meta name="description" content="马羊同学的自媒体拍摄计划与每周打卡 App">
+  <title>羊片场｜自媒体拍摄计划</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon.png">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    html { min-height: 100%; background: var(--background); }
+    body {
+      margin: 0;
+      min-height: 100%;
+      padding:
+        max(20px, env(safe-area-inset-top))
+        max(16px, env(safe-area-inset-right))
+        max(28px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+      background: var(--background);
+    }
+    #yang-planner { width: min(1120px, 100%); margin: 0 auto; }
+  </style>
+</head>
+<body>
+<div id="yang-planner">
+  <style>
+    #yang-planner {
+      color: var(--foreground);
+      font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    #yang-planner * { box-sizing: border-box; }
+    #yang-planner .yp-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    #yang-planner .yp-kicker {
+      color: var(--muted-foreground);
+      font-size: var(--font-size-base);
+      letter-spacing: .08em;
+    }
+    #yang-planner .yp-header h2 {
+      margin: 6px 0 0;
+      font-weight: 500;
+    }
+    #yang-planner .yp-week {
+      text-align: right;
+      white-space: nowrap;
+    }
+    #yang-planner .yp-week strong { display: block; font-weight: 500; }
+    #yang-planner .yp-week span { color: var(--muted-foreground); }
+    #yang-planner .yp-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 16px 0;
+    }
+    #yang-planner .yp-panel[hidden] { display: none; }
+    #yang-planner .yp-focus {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    #yang-planner .yp-focus h3 {
+      margin: 8px 0 0;
+      font-weight: 500;
+    }
+    #yang-planner .yp-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    #yang-planner .yp-stat {
+      padding-left: 14px;
+      border-left: 2px solid var(--border);
+    }
+    #yang-planner .yp-stat:first-child { border-left-color: var(--viz-series-1); }
+    #yang-planner .yp-stat:nth-child(2) { border-left-color: var(--viz-series-2); }
+    #yang-planner .yp-stat:nth-child(3) { border-left-color: var(--viz-series-3); }
+    #yang-planner .yp-stat span {
+      display: block;
+      color: var(--muted-foreground);
+    }
+    #yang-planner .yp-stat strong {
+      display: block;
+      margin: 5px 0;
+      font-weight: 500;
+    }
+    #yang-planner .yp-progress {
+      height: 7px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      background: var(--muted);
+    }
+    #yang-planner .yp-progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: var(--viz-series-1);
+      transition: width .2s ease;
+    }
+    #yang-planner .yp-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 20px 0 12px;
+    }
+    #yang-planner .yp-section-head h3 { margin: 0; font-weight: 500; }
+    #yang-planner .yp-section-head span { color: var(--muted-foreground); }
+    #yang-planner .yp-video-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    #yang-planner .yp-video {
+      display: flex;
+      min-height: 270px;
+      flex-direction: column;
+    }
+    #yang-planner .yp-video-band {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 3px solid var(--viz-series-1);
+    }
+    #yang-planner .yp-video:nth-child(2) .yp-video-band { border-bottom-color: var(--viz-series-2); }
+    #yang-planner .yp-video:nth-child(3) .yp-video-band { border-bottom-color: var(--viz-series-3); }
+    #yang-planner .yp-video-band strong { font-weight: 500; }
+    #yang-planner .yp-video h3 {
+      margin: 16px 0 10px;
+      font-weight: 500;
+    }
+    #yang-planner .yp-video p {
+      margin: 0 0 16px;
+      color: var(--muted-foreground);
+    }
+    #yang-planner .yp-video .btn { margin-top: auto; }
+    #yang-planner .yp-execution {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(230px, .65fr);
+      gap: 18px;
+      margin-top: 20px;
+    }
+    #yang-planner .yp-task {
+      display: grid;
+      grid-template-columns: auto 44px 1fr;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 11px 0;
+      border: 0;
+      border-bottom: 1px solid var(--border);
+      background: transparent;
+      color: var(--foreground);
+      text-align: left;
+      cursor: pointer;
+    }
+    #yang-planner .yp-task:last-child { border-bottom: 0; }
+    #yang-planner .yp-task-day { color: var(--muted-foreground); }
+    #yang-planner .yp-task strong { display: block; font-weight: 500; }
+    #yang-planner .yp-task small { color: var(--muted-foreground); }
+    #yang-planner .yp-task.is-done strong {
+      color: var(--muted-foreground);
+      text-decoration: line-through;
+    }
+    #yang-planner .yp-check {
+      display: inline-grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+    }
+    #yang-planner .yp-task.is-done .yp-check {
+      background: var(--primary);
+      color: var(--primary-foreground);
+    }
+    #yang-planner .yp-reminder h3 { margin-top: 0; font-weight: 500; }
+    #yang-planner .yp-reminder ol { margin: 0; padding-left: 20px; }
+    #yang-planner .yp-reminder li { margin: 10px 0; }
+    #yang-planner .yp-reminder blockquote {
+      margin: 18px 0 0;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      color: var(--muted-foreground);
+    }
+    #yang-planner .yp-topic {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1.3fr) minmax(180px, .7fr) auto;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    #yang-planner .yp-topic-score { font-weight: 500; }
+    #yang-planner .yp-topic strong { display: block; font-weight: 500; }
+    #yang-planner .yp-topic small,
+    #yang-planner .yp-topic p { color: var(--muted-foreground); }
+    #yang-planner .yp-topic p { margin: 0; }
+    #yang-planner .yp-mix {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    #yang-planner .yp-mix .viz-stat-value { font-weight: 500; }
+    #yang-planner .yp-signal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    #yang-planner .yp-signal {
+      padding-top: 12px;
+      border-top: 2px solid var(--border);
+    }
+    #yang-planner .yp-signal h3 { margin: 7px 0; font-weight: 500; }
+    #yang-planner .yp-signal p { margin: 0; color: var(--muted-foreground); }
+    #yang-planner .yp-position {
+      padding: 20px 0 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    #yang-planner .yp-position h2 { margin: 8px 0; font-weight: 500; }
+    #yang-planner .yp-position p { max-width: 660px; color: var(--muted-foreground); }
+    #yang-planner .yp-pillar-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 20px;
+    }
+    #yang-planner .yp-pillar {
+      padding-top: 14px;
+      border-top: 4px solid var(--viz-series-1);
+    }
+    #yang-planner .yp-pillar:nth-child(2) { border-top-color: var(--viz-series-2); }
+    #yang-planner .yp-pillar:nth-child(3) { border-top-color: var(--viz-series-3); }
+    #yang-planner .yp-pillar h3 { margin: 7px 0; font-weight: 500; }
+    #yang-planner .yp-pillar p { color: var(--muted-foreground); }
+    #yang-planner .yp-plan {
+      margin-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    #yang-planner .yp-plan details { border-bottom: 1px solid var(--border); }
+    #yang-planner .yp-plan summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 0;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    #yang-planner .yp-plan-body { padding-bottom: 18px; }
+    #yang-planner .yp-promise {
+      padding-left: 14px;
+      border-left: 3px solid var(--viz-series-1);
+    }
+    #yang-planner .yp-node-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+    #yang-planner .yp-node {
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+    #yang-planner .yp-shot-table { margin-top: 14px; }
+    #yang-planner .yp-empty {
+      color: var(--muted-foreground);
+      text-align: center;
+      padding: 28px 0;
+    }
+    @media (max-width: 680px) {
+      #yang-planner .yp-header,
+      #yang-planner .yp-section-head { align-items: flex-start; }
+      #yang-planner .yp-focus,
+      #yang-planner .yp-execution { grid-template-columns: 1fr; }
+      #yang-planner .yp-video-grid,
+      #yang-planner .yp-pillar-grid { grid-template-columns: 1fr; }
+      #yang-planner .yp-video { min-height: 0; }
+      #yang-planner .yp-topic {
+        grid-template-columns: 42px minmax(0, 1fr) auto;
+      }
+      #yang-planner .yp-topic p { display: none; }
+      #yang-planner .yp-node-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 430px) {
+      #yang-planner .yp-header { display: block; }
+      #yang-planner .yp-week { margin-top: 10px; text-align: left; }
+      #yang-planner .yp-stats,
+      #yang-planner .yp-mix,
+      #yang-planner .yp-signal-grid { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #yang-planner .yp-progress span { transition: none; }
+    }
+  </style>
+
+  <header class="yp-header">
+    <div>
+      <span class="yp-kicker">第 01 季 · 北京</span>
+      <h2>本周，把三个判断拍出来。</h2>
+    </div>
+    <div class="yp-week">
+      <strong>WEEK 01</strong>
+      <span>7.28 — 8.03</span>
+    </div>
+  </header>
+
+  <nav class="yp-nav" aria-label="内容规划导航">
+    <button class="btn btn-primary" type="button" data-view="week" aria-pressed="true">本周执行</button>
+    <button class="btn" type="button" data-view="topics" aria-pressed="false">选题库</button>
+    <button class="btn" type="button" data-view="review" aria-pressed="false">30天验证</button>
+    <button class="btn" type="button" data-view="position" aria-pressed="false">内容定位</button>
+  </nav>
+
+  <section class="yp-panel" data-panel="week">
+    <div class="yp-focus">
+      <div>
+        <span class="yp-kicker">本周创作命题</span>
+        <h3>不是“拍了什么”，而是验证了什么。</h3>
+      </div>
+      <div class="yp-stats">
+        <div class="yp-stat"><span>计划发布</span><strong>3 条</strong><span>短视频</span></div>
+        <div class="yp-stat"><span>内容配比</span><strong>50 / 30 / 20</strong><span>城市 / 好物 / 观点</span></div>
+        <div class="yp-stat"><span>本周进度</span><strong id="yp-progress-label">0%</strong><span id="yp-progress-count">0/6 项完成</span></div>
+      </div>
+    </div>
+    <div class="yp-progress" aria-label="本周任务完成进度"><span id="yp-progress-bar"></span></div>
+
+    <div class="yp-section-head">
+      <h3>本周视频主题</h3>
+      <span>一次集中拍摄 · 三条内容</span>
+    </div>
+    <div class="yp-video-grid">
+      <article class="card yp-video">
+        <div class="yp-video-band"><strong>01</strong><span>城市体验 · 本周主片</span></div>
+        <h3>我在北京找了一天，什么样的餐厅最适合一个人吃饭？</h3>
+        <p>一个人吃饭最尴尬的，可能不是没人陪，而是很多餐厅根本没想过你会一个人来。</p>
+        <button class="btn" type="button" data-open-plan="solo">查看分镜与提要</button>
+      </article>
+      <article class="card yp-video">
+        <div class="yp-video-band"><strong>02</strong><span>好物实测 · 商业化样片</span></div>
+        <h3>为了拍好视频，新手最不该先买什么？</h3>
+        <p>我买过最没用的拍摄设备，恰好也是新手最容易第一个下单的东西。</p>
+        <button class="btn" type="button" data-open-plan="gear">查看分镜与提要</button>
+      </article>
+      <article class="card yp-video">
+        <div class="yp-video-band"><strong>03</strong><span>行走观点 · 人格记忆点</span></div>
+        <h3>为什么很多人一面对镜头，就突然不像自己？</h3>
+        <p>镜头一开，我会立刻变成一个连自己都不认识的人。</p>
+        <button class="btn" type="button" data-open-plan="camera">查看分镜与提要</button>
+      </article>
+    </div>
+
+    <div id="yp-plan-target" class="yp-plan" aria-live="polite"></div>
+
+    <div class="yp-execution">
+      <section>
+        <div class="yp-section-head">
+          <h3>本周打卡</h3>
+          <span id="yp-task-count">0/6</span>
+        </div>
+        <div id="yp-task-list"></div>
+      </section>
+      <aside class="card yp-reminder">
+        <h3>拍摄日提醒</h3>
+        <ol>
+          <li>第一感受与真实反应</li>
+          <li>意外情况与判断变化</li>
+          <li>环境声、动作和细节证据</li>
+        </ol>
+        <blockquote>先拍过程，后写旁白。本人每次出镜，只承担最有力量的那一句。</blockquote>
+      </aside>
+    </div>
+  </section>
+
+  <section class="yp-panel" data-panel="topics" hidden>
+    <div class="yp-section-head">
+      <div>
+        <span class="yp-kicker">30-DAY TOPIC BANK</span>
+        <h3>先选一个值得验证的问题。</h3>
+      </div>
+      <div class="viz-controls" aria-label="选题类型筛选">
+        <button class="btn btn-primary" type="button" data-filter="全部" aria-pressed="true">全部</button>
+        <button class="btn" type="button" data-filter="城市体验" aria-pressed="false">城市</button>
+        <button class="btn" type="button" data-filter="好物实测" aria-pressed="false">好物</button>
+        <button class="btn" type="button" data-filter="行走观点" aria-pressed="false">观点</button>
+      </div>
+    </div>
+    <div id="yp-topic-list"></div>
+  </section>
+
+  <section class="yp-panel" data-panel="review" hidden>
+    <div class="yp-section-head">
+      <div>
+        <span class="yp-kicker">30-DAY VALIDATION</span>
+        <h3>不选播放最高的，选同时成立的。</h3>
+      </div>
+    </div>
+    <div class="yp-mix">
+      <div class="card viz-stat"><span class="text-muted">城市体验</span><div class="viz-stat-value">5 条</div><span class="text-muted">陌生流量入口</span></div>
+      <div class="card viz-stat"><span class="text-muted">好物实测</span><div class="viz-stat-value">4 条</div><span class="text-muted">消费决策与商业化</span></div>
+      <div class="card viz-stat"><span class="text-muted">行走观点</span><div class="viz-stat-value">3 条</div><span class="text-muted">人格与忠诚度</span></div>
+    </div>
+    <table class="table">
+      <thead><tr><th>每条必记</th><th>它回答的问题</th></tr></thead>
+      <tbody>
+        <tr><td>3秒留存</td><td>开场冲突够不够清楚</td></tr>
+        <tr><td>平均观看比例</td><td>过程是否持续有变化</td></tr>
+        <tr><td>收藏率</td><td>实用价值是否成立</td></tr>
+        <tr><td>评论中的个人认同</td><td>观点有没有筛选出同类观众</td></tr>
+        <tr><td>每万播放新增关注</td><td>观众记住的是题目还是你</td></tr>
+      </tbody>
+    </table>
+    <div class="yp-signal-grid">
+      <div class="yp-signal"><span class="yp-kicker">高播放 · 低关注</span><h3>题目好，但你没被记住</h3><p>保留入口，加强你的选择标准与出镜句。</p></div>
+      <div class="yp-signal"><span class="yp-kicker">低播放 · 高关注</span><h3>人格对，但入口太窄</h3><p>换一个大多数人都能理解的现实问题。</p></div>
+      <div class="yp-signal"><span class="yp-kicker">高收藏</span><h3>实用价值已经成立</h3><p>补充可搜索标题与图文版，承接长期流量。</p></div>
+      <div class="yp-signal"><span class="yp-kicker">表达被复述</span><h3>个人 IP 正在形成</h3><p>把这句话沉淀成稳定结尾或系列命题。</p></div>
+    </div>
+  </section>
+
+  <section class="yp-panel" data-panel="position" hidden>
+    <div class="yp-position">
+      <span class="yp-kicker">马羊同学</span>
+      <h2>一个北京男生的真实体验与生活判断</h2>
+      <p>走出去亲自体验美食、产品和城市生活，帮观众找到真正值得的东西。</p>
+    </div>
+    <div class="yp-pillar-grid">
+      <article class="yp-pillar"><strong>50% · 主线</strong><h3>城市真实体验</h3><p>陌生流量入口。不是简单探店，而是带着明确问题完成一次小型调查。</p><span>问题 · 过程 · 意外 · 结论</span></article>
+      <article class="yp-pillar"><strong>30% · 副线一</strong><h3>有审美的真实好物</h3><p>把产品放进真实生活，判断它解决什么、限制什么、适合谁。</p><span>场景 · 质感 · 情绪 · 值得</span></article>
+      <article class="yp-pillar"><strong>20% · 副线二</strong><h3>行走式观点故事</h3><p>让观点发生在具体环境里，不坐在房间连续讲五分钟。</p><span>经历 · 移动 · 声音 · 价值观</span></article>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      const root = document.getElementById("yang-planner");
+      const taskKey = "yang-inline-week-tasks";
+      const tasks = [
+        { id: "position", day: "周二", label: "锁定本周3个问题与内容承诺", meta: "选题 · 45分钟" },
+        { id: "scout", day: "周三", label: "踩点、联系餐厅、确认交通路线", meta: "制片 · 2小时" },
+        { id: "shoot", day: "周四", label: "集中拍城市主片＋好物样片", meta: "拍摄 · 6小时" },
+        { id: "rough", day: "周五", label: "素材备份、选片并完成主片粗剪", meta: "后期 · 4小时" },
+        { id: "voice", day: "周六", label: "写旁白、补录观点片、制作封面", meta: "表达 · 3小时" },
+        { id: "review", day: "周日", label: "发布并记录5项数据，写一句复盘", meta: "复盘 · 30分钟" }
+      ];
+      const topics = [
+        { type: "城市体验", score: 94, title: "30元、100元和300元的烤鸭，差别到底在哪里？", promise: "看懂烤鸭真正值得付费的部分" },
+        { type: "城市体验", score: 91, title: "北京凌晨两点，还有什么值得专门去吃？", promise: "得到一份真正可靠的深夜选择" },
+        { type: "城市体验", score: 88, title: "预算100元，怎样安排一次真正体面的约会？", promise: "不靠昂贵消费，也能完成体面约会" },
+        { type: "好物实测", score: 93, title: "我带着三款降噪耳机坐了一整天北京地铁", promise: "知道降噪不是越强越好" },
+        { type: "好物实测", score: 89, title: "网上最火的五件独居好物，哪些最后会吃灰？", promise: "避开漂亮但低频的消费陷阱" },
+        { type: "好物实测", score: 85, title: "一部旧手机，真的会降低生活品质吗？", promise: "辨别真实需求与升级焦虑" },
+        { type: "行走观点", score: 92, title: "北京最迷人的地方，也是它最残酷的地方", promise: "看见同一种城市节奏的两面" },
+        { type: "行走观点", score: 87, title: "我们买的究竟是产品，还是理想中的自己？", promise: "理解消费背后的身份想象" },
+        { type: "行走观点", score: 84, title: "31岁以后，我开始重新理解“有品位”", promise: "重新理解品位与价格无关的部分" }
+      ];
+      const plans = {
+        solo: {
+          title: "一个人吃饭餐厅实测",
+          promise: "观众会知道独自吃饭时，比“好吃”更重要的三个判断标准。",
+          nodes: ["入店压力：排队、拼桌与座位安排", "用餐节奏：份量、出餐和服务", "情绪体验：能否舒服待够40分钟"],
+          shots: [
+            ["0–03s", "冲突开场", "独自站在热门餐厅门口，抛出反常识问题"],
+            ["03–10s", "建立任务", "社区店、网红店、精致小馆快速切换"],
+            ["10–30s", "第一轮验证", "推门、报人数、落座、看菜单"],
+            ["30–52s", "体验变化", "等待时间、桌距、食物细节与真实表情"],
+            ["52–72s", "判断翻转", "最贵的店反而最想离开"],
+            ["72–88s", "明确结论", "分别给赶时间、想放空、带电脑的人建议"]
+          ],
+          ending: "我想找的不是最热闹的店，而是那些一个人走进去，也不会被世界催着离开的地方。"
+        },
+        gear: {
+          title: "新手拍摄设备真实测试",
+          promise: "观众会知道第一笔拍摄预算应该先解决声音、稳定还是画质。",
+          nodes: ["只升级相机、收音和灯光各拍一组", "邀请三位普通观众完成盲选", "计算每100元带来的真实提升"],
+          shots: [
+            ["0–03s", "失败证据", "拉开抽屉，露出落灰设备"],
+            ["03–12s", "任务说明", "画质、声音、稳定三张预算卡"],
+            ["12–34s", "真实测试", "地铁口、窗边、夜街同构图样片"],
+            ["34–48s", "盲选结果", "保留朋友看片的自然反应"],
+            ["48–64s", "明确结论", "给出购买优先级与三档预算"]
+          ],
+          ending: "我不想帮你买更多设备，只想帮你把钱花在观众真的能感受到的地方。"
+        },
+        camera: {
+          title: "面对镜头为什么不像自己",
+          promise: "观众会理解镜头恐惧不是不会表达，而是太想一次表现正确。",
+          nodes: ["展示背稿失败与自然聊天对比", "三个行走场景讲清表达压力", "用关键词表达法完成现场验证"],
+          shots: [
+            ["0–04s", "真实卡壳", "连续三次说错同一句开场"],
+            ["04–15s", "问题提出", "走出家门，提出镜头前的表演感"],
+            ["15–38s", "场景推进", "地铁倒影、候车、抵达拍摄地"],
+            ["38–58s", "方法验证", "备忘录只写三个关键词"],
+            ["58–76s", "判断变化", "自然不是毫无准备，而是不决定每个字"]
+          ],
+          ending: "我不想在镜头前显得更厉害，只想慢慢变得和镜头外的自己一样真实。"
+        }
+      };
+      let checked = {};
+      try { checked = JSON.parse(localStorage.getItem(taskKey) || "{}"); } catch (error) { checked = {}; }
+
+      function renderTasks() {
+        const list = root.querySelector("#yp-task-list");
+        list.innerHTML = tasks.map(task => `
+          <button class="yp-task ${checked[task.id] ? "is-done" : ""}" type="button" data-task="${task.id}" aria-pressed="${checked[task.id] ? "true" : "false"}">
+            <span class="yp-check" aria-hidden="true">${checked[task.id] ? "✓" : ""}</span>
+            <span class="yp-task-day">${task.day}</span>
+            <span><strong>${task.label}</strong><small>${task.meta}</small></span>
+          </button>
+        `).join("");
+        const done = tasks.filter(task => checked[task.id]).length;
+        const pct = Math.round(done / tasks.length * 100);
+        root.querySelector("#yp-progress-bar").style.width = `${pct}%`;
+        root.querySelector("#yp-progress-label").textContent = `${pct}%`;
+        root.querySelector("#yp-progress-count").textContent = `${done}/${tasks.length} 项完成`;
+        root.querySelector("#yp-task-count").textContent = `${done}/${tasks.length}`;
+      }
+
+      function renderTopics(filter = "全部") {
+        const filtered = filter === "全部" ? topics : topics.filter(topic => topic.type === filter);
+        root.querySelector("#yp-topic-list").innerHTML = filtered.map(topic => `
+          <div class="yp-topic">
+            <span class="yp-topic-score">${topic.score}</span>
+            <div><small>${topic.type}</small><strong>${topic.title}</strong></div>
+            <p>${topic.promise}</p>
+            <button class="btn btn-ghost" type="button" data-add-topic="${topic.title}" aria-label="加入候选计划">＋</button>
+          </div>
+        `).join("");
+      }
+
+      function renderPlan(id) {
+        const plan = plans[id];
+        root.querySelector("#yp-plan-target").innerHTML = `
+          <details open>
+            <summary><span>${plan.title}</span><span>分镜与提要</span></summary>
+            <div class="yp-plan-body">
+              <p class="yp-promise"><strong>内容承诺：</strong>${plan.promise}</p>
+              <div class="yp-node-grid">${plan.nodes.map((node, index) => `<div class="yp-node"><strong>0${index + 1}</strong><p>${node}</p></div>`).join("")}</div>
+              <div class="table-responsive yp-shot-table">
+                <table class="table table-sm">
+                  <thead><tr><th>时段</th><th>节点</th><th>画面</th></tr></thead>
+                  <tbody>${plan.shots.map(shot => `<tr><td class="text-nowrap">${shot[0]}</td><td>${shot[1]}</td><td>${shot[2]}</td></tr>`).join("")}</tbody>
+                </table>
+              </div>
+              <p><strong>筛选式结尾：</strong>“${plan.ending}”</p>
+            </div>
+          </details>
+        `;
+        root.querySelector("#yp-plan-target").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      root.querySelectorAll("[data-view]").forEach(button => {
+        button.addEventListener("click", () => {
+          const view = button.dataset.view;
+          root.querySelectorAll("[data-view]").forEach(item => {
+            const selected = item === button;
+            item.classList.toggle("btn-primary", selected);
+            item.setAttribute("aria-pressed", selected ? "true" : "false");
+          });
+          root.querySelectorAll("[data-panel]").forEach(panel => { panel.hidden = panel.dataset.panel !== view; });
+        });
+      });
+
+      root.addEventListener("click", event => {
+        const taskButton = event.target.closest("[data-task]");
+        if (taskButton) {
+          checked[taskButton.dataset.task] = !checked[taskButton.dataset.task];
+          localStorage.setItem(taskKey, JSON.stringify(checked));
+          renderTasks();
+          return;
+        }
+        const planButton = event.target.closest("[data-open-plan]");
+        if (planButton) {
+          renderPlan(planButton.dataset.openPlan);
+          return;
+        }
+        const filterButton = event.target.closest("[data-filter]");
+        if (filterButton) {
+          root.querySelectorAll("[data-filter]").forEach(item => {
+            const selected = item === filterButton;
+            item.classList.toggle("btn-primary", selected);
+            item.setAttribute("aria-pressed", selected ? "true" : "false");
+          });
+          renderTopics(filterButton.dataset.filter);
+          return;
+        }
+        const addButton = event.target.closest("[data-add-topic]");
+        if (addButton) {
+          addButton.textContent = "✓";
+          addButton.setAttribute("aria-label", "已加入候选计划");
+        }
+      });
+
+      renderTasks();
+      renderTopics();
+    })();
+  </script>
+</div>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
+  }
+</script>
+</body>
+</html>
