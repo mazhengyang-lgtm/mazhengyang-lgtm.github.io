@@ -1,4 +1,4 @@
-const CACHE_NAME = "yangpianchang-v4";
+const CACHE_NAME = "yangpianchang-v5";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/og.png"];
 
 self.addEventListener("install", (event) => {
