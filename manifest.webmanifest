@@ -1,16 +1,17 @@
 {
-  "name": "羊片场｜自媒体拍摄计划",
+  "name": "羊片场｜自媒体拍摄规划",
   "short_name": "羊片场",
-  "description": "每周选题、拍摄分镜、内容提要和打卡管理",
-  "lang": "zh-CN",
-  "start_url": "./",
-  "scope": "./",
+  "description": "一键生成个性化选题，并把灵感拆成逐时间段拍摄脚本、分镜与内容提要。",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#f7f5ef",
-  "theme_color": "#f7f5ef",
+  "background_color": "#f3f0e8",
+  "theme_color": "#1d1d1b",
+  "orientation": "portrait-primary",
+  "lang": "zh-CN",
   "icons": [
     {
-      "src": "./icon.png",
+      "src": "/og.png",
       "sizes": "any",
       "type": "image/png",
       "purpose": "any"
