@@ -2,7 +2,7 @@
   "name": "羊片场｜自媒体拍摄规划",
   "short_name": "羊片场",
   "description": "一键生成个性化选题，并把灵感拆成逐时间段拍摄脚本、分镜与内容提要。",
-  "start_url": "/",
+  "start_url": "/?v=10",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f5f8ff",
